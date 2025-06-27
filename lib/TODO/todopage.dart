@@ -41,8 +41,6 @@ class _ToDoPageState extends State<ToDoPage> {
     loadTaskFromPrefs();
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -58,8 +56,11 @@ class _ToDoPageState extends State<ToDoPage> {
           centerTitle: true,
           leading: IconButton(onPressed: (){}, icon: const Icon(Icons.navigate_before_outlined,size: 50,color: Colors.black,),),
           actions: [
-            IconButton(onPressed: (){
-            }, icon: const Icon(Icons.navigate_next_outlined,size: 50,color: Colors.black,),)
+            IconButton(onPressed: ()
+            {
+              // Navigator.push(context, MaterialPageRoute(builder:(context)=> ()));
+            },
+              icon: const Icon(Icons.navigate_next_outlined,size: 50,color: Colors.black,),)
           ],
           flexibleSpace: Container(
             decoration: BoxDecoration(
@@ -125,9 +126,7 @@ class _ToDoPageState extends State<ToDoPage> {
                     ),
                   ),
                 ),
-              ),
-
-
+              ), //Add Icon
 
                   Expanded(
                     child: Card(
@@ -150,9 +149,15 @@ class _ToDoPageState extends State<ToDoPage> {
                       {
                         final key = arrTask.keys.elementAt(index);
                         final value = arrTask[key]!;
-                        return TaskContainer(
-                          task: key,
-                          info: value
+                        return InkWell(
+                          onLongPress: (){
+                            showDeleteTaskDialog(context,key);
+                          },
+                          child: TaskContainer(
+                            task: key,
+                            info: value
+                          ),
+
                         );
                       }),
                     ),
@@ -228,9 +233,38 @@ class _ToDoPageState extends State<ToDoPage> {
     );
   }
 
-  void showDeleteTaskDialog(BuildContext context)
+  void showDeleteTaskDialog(BuildContext context, String taskKey)
   {
-
+    showDialog(context: context, builder: (context){
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        title: Text("Delete Task"),
+        content: Text("Are you sure you want to delete $taskKey?"),
+        actions: [
+          TextButton(
+              onPressed: (){
+                Navigator.pop(context);
+              },
+              child: Text("Cancel"),
+          ),
+          ElevatedButton(
+              onPressed: (){
+                  setState(() {
+                    arrTask.remove(taskKey);
+                    saveTaskToPrefs();
+                  });
+                  Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
+              child: Text("Delete"),
+          ),
+        ],
+      );
+    });
   }
 }
 // ----------------------List Generator-----------------------------------------------------
