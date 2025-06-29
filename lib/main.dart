@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:learn_phase/pages/daily_page.dart';
 import 'TODO/todopage.dart';
 
 void main()
@@ -17,9 +18,11 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         primarySwatch: Colors.blue, // for consistency
         scaffoldBackgroundColor: Color.fromRGBO(199, 220, 225, 1.0),
+        fontFamily: 'Merri',
+
       ),
       debugShowCheckedModeBanner: false,
-      home: ToDoPage(),
+      home: DailyPages(),
     );
   }
 }

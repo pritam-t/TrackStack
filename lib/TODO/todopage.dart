@@ -3,6 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../pages/daily_page.dart';
+
 class ToDoPage extends StatefulWidget {
   const ToDoPage({super.key});
 
@@ -47,10 +49,10 @@ class _ToDoPageState extends State<ToDoPage> {
       child: Scaffold(
         appBar: AppBar(
           toolbarHeight: 80,
-        title: const Text("Todo App",
+        title: const Text("To-Do App",
           style: TextStyle(
           fontSize: 35,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w400,
             color: Colors.black
         ),),
           centerTitle: true,
@@ -58,7 +60,7 @@ class _ToDoPageState extends State<ToDoPage> {
           actions: [
             IconButton(onPressed: ()
             {
-              // Navigator.push(context, MaterialPageRoute(builder:(context)=> ()));
+              Navigator.push(context, MaterialPageRoute(builder:(context)=> DailyPages()));
             },
               icon: const Icon(Icons.navigate_next_outlined,size: 50,color: Colors.black,),)
           ],
@@ -116,7 +118,7 @@ class _ToDoPageState extends State<ToDoPage> {
                               "Add ",
                               style: TextStyle(
                                 fontSize: 20,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                             Icon(Icons.add_circle_outlined, size: 20),
@@ -128,7 +130,7 @@ class _ToDoPageState extends State<ToDoPage> {
                 ),
               ), //Add Icon
 
-                  Expanded(
+              Expanded(
                     child: Card(
                       margin: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),
                       elevation: 20,
@@ -162,11 +164,8 @@ class _ToDoPageState extends State<ToDoPage> {
                       }),
                     ),
                   )
-                ],
-          ),
-      ),
-    );
-
+                ],),
+      ),);
   }
 
 
