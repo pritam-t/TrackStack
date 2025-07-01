@@ -466,7 +466,7 @@ class _TaskCardContentState extends State<_TaskCardContent> {
         children: [
           Center(
             child: Text(
-              "📅 ${widget.task.date}",
+              "🗓️ ${widget.task.date}",
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
           ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:learn_phase/pages/daily_page.dart';
-import 'TODO/todopage.dart';
+import 'package:learn_phase/pages/splash_screen.dart';
 
 void main()
 {
@@ -22,7 +21,7 @@ class MyApp extends StatelessWidget {
 
       ),
       debugShowCheckedModeBanner: false,
-      home: DailyPages(),
+      home: SplashScreen(),
     );
   }
 }

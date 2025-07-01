@@ -18,11 +18,13 @@
 ## 📸 Screenshots
 
 ### ✅ ToDo Page
-<img src="assets/screenshots/todo_page.png" width="300" alt="ToDo Page">
+
+<img src="assets/images/splashscreen.jpg" width="300" alt="TrackStack">
+<img src="assets/images/todo_page.jpg" width="300" alt="ToDo Page">
 
 ### 📚 Learning Pages
-<img src="assets/screenshots/learning_1.png" width="300" alt="Learning Page 1">
-<img src="assets/screenshots/learning_2.png" width="300" alt="Learning Page 2">
+<img src="assets/images/learning_1.jpg" width="300" alt="Learning Page 1">
+<img src="assets/images/learning_1.jpg" width="300" alt="Learning Page 2">
 
 ---
 
@@ -38,18 +40,18 @@
 
 ## 🗂️ Project Structure
 
-lib/
-├── main.dart
-├── pages/
-│ ├── daily_pages.dart
-│ └── task_model.dart
+lib/<br>
+├── main.dart<br>
+├── pages/<br>
+│ ├── daily_pages.dart<br>
+│ └── task_model.dart<br>
 assets/<br>
 └── screenshots/<br>
 ├── todo_page.png<br>
 ├── learning_1.png<br>
 └── learning_2.png<br>
 
-## ▶️ Getting Started
+# ▶️ Getting Started
 
 1. **Clone the repository**
    ```bash
@@ -65,7 +67,7 @@ assets/<br>
    ```bash
    flutter run
 
-## 📄 License
+# 📄 License
 This project is licensed under the MIT License.
 Feel free to fork it and make it your own!
 
@@ -73,8 +75,3 @@ Feel free to fork it and make it your own!
 
 ---
 
-### Let me know if you'd like me to:
-
-- Generate preview images of your app UI (if you share a screenshot)
-- Help you auto-deploy the app as a GitHub Page preview
-- Or write a contribution guide section (`CONTRIBUTING.md`)
