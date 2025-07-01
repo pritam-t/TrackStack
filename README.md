@@ -43,11 +43,11 @@ lib/
 ├── pages/
 │ ├── daily_pages.dart
 │ └── task_model.dart
-assets/
-└── screenshots/
-├── todo_page.png
-├── learning_1.png
-└── learning_2.png
+assets/<br>
+└── screenshots/<br>
+├── todo_page.png<br>
+├── learning_1.png<br>
+└── learning_2.png<br>
 
 ## ▶️ Getting Started
 
