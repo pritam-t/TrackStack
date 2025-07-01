@@ -60,7 +60,7 @@ assets/<br>
 
 ### ▶️ Getting Started
 
-1. **Clone the repository**
+1. **Clone this repository**
    ```bash
    git clone https://github.com/your-username/TrackStack.git
    cd TrackStack
