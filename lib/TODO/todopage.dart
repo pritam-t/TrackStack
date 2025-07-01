@@ -49,7 +49,7 @@ class _ToDoPageState extends State<ToDoPage> {
       child: Scaffold(
         appBar: AppBar(
           toolbarHeight: 80,
-        title: const Text("To-Do App",
+        title: const Text("To-Do",
           style: TextStyle(
           fontSize: 35,
           fontWeight: FontWeight.w400,
