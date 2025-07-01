@@ -21,9 +21,9 @@
 
 <p align="center">
 
-| ![Splash Screen](assets/images/splashscreen.jpg) | ![Learning Page](assets/images/learning_1.jpg) |
-|:------------------------------------------------:|:----------------------------------------------:|
-|                **Splash Screen**                 |               **Learning Page**                |
+| ![Splash Screen](assets/images/splashscreen.jpg) | ![Learning Page](assets/images/learn.jpg) |
+|:------------------------------------------------:|:-----------------------------------------:|
+|                **Splash Screen**                 |             **Learning Page**             |
 
 | ![Product 1](assets/images/prod1.jpg) | ![Product 2](assets/images/prod2.jpg) |
 |:-------------------------------------:|:-------------------------------------:|
