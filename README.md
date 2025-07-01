@@ -1,4 +1,4 @@
-# 📱 TrackStack
+# 📝 TrackStack
 
 **TrackStack** is a Flutter-based productivity app that helps you manage your daily goals and learning habits using a clean, card-based interface. Each day has its own card where you can log whether you woke up early, learned DSA, and write personal notes. All data is stored locally using SharedPreferences and persists even after restarting the app.
 
@@ -58,7 +58,7 @@ assets/<br>
 ├── learning_1.png<br>
 └── learning_2.png<br>
 
-## ▶️ Getting Started
+### ▶️ Getting Started
 
 1. **Clone the repository**
    ```bash
