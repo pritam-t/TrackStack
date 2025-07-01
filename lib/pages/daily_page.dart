@@ -105,8 +105,41 @@ class _DailyPagesState extends State<DailyPages> with TickerProviderStateMixin {
     // Add any existing previous days
     _tasks.addAll(loadedTasks.where((task) => task.date != today));
 
+    // Sort tasks by date (newest first)
+    _tasks.sort((a, b) => DateFormat('dd MMM yy').parse(b.date).compareTo(
+        DateFormat('dd MMM yy').parse(a.date)));
+
+    // Ensure we have the last 30 days
+    final now = DateTime.now();
+    final earliestAllowedDate = now.subtract(const Duration(days: 30));
+    final earliestTaskDate = _tasks.isNotEmpty
+        ? DateFormat('dd MMM yy').parse(_tasks.last.date)
+        : now;
+
+    if (earliestTaskDate.isAfter(earliestAllowedDate)) {
+      // Add missing days
+      final newTasks = <TaskModel>[];
+      var currentDate = earliestTaskDate;
+      while (currentDate.isAfter(earliestAllowedDate)) {
+        currentDate = currentDate.subtract(const Duration(days: 1));
+        final dateStr = DateFormat('dd MMM yy').format(currentDate);
+        if (!_tasks.any((task) => task.date == dateStr)) {
+          newTasks.add(TaskModel(
+            date: dateStr,
+            wokeUpEarly: false,
+            learnedDsa: false,
+            note: '',
+          ));
+        }
+      }
+      _tasks.addAll(newTasks);
+      _tasks.sort((a, b) => DateFormat('dd MMM yy').parse(b.date).compareTo(
+          DateFormat('dd MMM yy').parse(a.date)));
+    }
+
     // Set to today's card
-    _currentIndex = 0;
+    _currentIndex = _tasks.indexWhere((task) => task.date == today);
+    if (_currentIndex == -1) _currentIndex = 0;
 
     await _saveTasks();
     setState(() => _isLoading = false);
@@ -153,19 +186,38 @@ class _DailyPagesState extends State<DailyPages> with TickerProviderStateMixin {
   }
 
   Future<void> _addPreviousDay() async {
-    final currentDate = DateFormat('dd MMM yy').parse(_tasks[_currentIndex].date);
-    final prevDate = DateFormat('dd MMM yy').format(currentDate.subtract(const Duration(days: 1)));
+    if (_tasks.isEmpty) return;
 
-    // Only add if previous day doesn't exist
-    if (!_tasks.any((task) => task.date == prevDate)) {
-      setState(() {
-        _tasks.insert(0, TaskModel(
+    final currentDate = DateFormat('dd MMM yy').parse(_tasks[0].date);
+    final now = DateTime.now();
+    final earliestAllowedDate = now.subtract(const Duration(days: 30));
+
+    // Don't add if we already have the earliest allowed date
+    if (currentDate.isBefore(earliestAllowedDate)) return;
+
+    // Calculate how many days to add (up to 30)
+    final daysToAdd = currentDate.difference(earliestAllowedDate).inDays;
+
+    if (daysToAdd <= 0) return;
+
+    // Generate all previous days at once
+    final newTasks = <TaskModel>[];
+    for (int i = 1; i <= daysToAdd; i++) {
+      final prevDate = DateFormat('dd MMM yy').format(currentDate.subtract(Duration(days: i)));
+      if (!_tasks.any((task) => task.date == prevDate)) {
+        newTasks.add(TaskModel(
           date: prevDate,
           wokeUpEarly: false,
           learnedDsa: false,
           note: '',
         ));
-        _currentIndex++;
+      }
+    }
+
+    if (newTasks.isNotEmpty) {
+      setState(() {
+        _tasks.insertAll(0, newTasks);
+        _currentIndex += newTasks.length;
       });
       await _saveTasks();
     }
@@ -225,11 +277,10 @@ class _DailyPagesState extends State<DailyPages> with TickerProviderStateMixin {
         _isAnimating = false;
       });
     } else {
-      await _addPreviousDay();
+      await _addPreviousDay(); // Changed from _addPreviousDay
       setState(() => _isAnimating = false);
     }
   }
-
   @override
   void dispose() {
     _slideController.dispose();
