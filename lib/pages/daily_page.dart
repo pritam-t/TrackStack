@@ -72,6 +72,8 @@ class _DailyPagesState extends State<DailyPages> with TickerProviderStateMixin {
     _initializeTasks();
   }
 
+
+
   Future<void> _initializeTasks() async {
     setState(() => _isLoading = true);
     final loadedTasks = await _loadTasks();
@@ -102,6 +104,8 @@ class _DailyPagesState extends State<DailyPages> with TickerProviderStateMixin {
 
     setState(() => _isLoading = false);
   }
+
+
 
   Future<List<TaskModel>> _loadTasks() async {
     final prefs = await SharedPreferences.getInstance();
@@ -268,19 +272,45 @@ class _DailyPagesState extends State<DailyPages> with TickerProviderStateMixin {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(bottom: 20),
+              padding: const EdgeInsets.only(top: 20, bottom: 50),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton.icon(
                     onPressed: _goToPreviousCard,
-                    icon: const Icon(Icons.arrow_back),
-                    label: const Text("Previous"),
+                    icon: const Icon(Icons.arrow_back, size: 24),
+                    label: const Text("Prev", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF86FFF9), // Soft teal
+                      foregroundColor: Colors.black87,
+                      elevation: 4,
+                      shadowColor: Colors.lightBlueAccent.shade700,
+                      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
                   ),
-                  ElevatedButton.icon(
+                  ElevatedButton(
                     onPressed: _goToNextCard,
-                    icon: const Icon(Icons.arrow_forward),
-                    label: const Text("Next"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:const Color(0xFF86FFF9),
+                      foregroundColor: Colors.black87,
+                      elevation: 4,
+                      shadowColor: Colors.lightBlueAccent.shade700,
+                      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Text("Next", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                        SizedBox(width: 8),
+                        Icon(Icons.arrow_forward, size: 24),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -392,7 +422,7 @@ class _TaskCardContentState extends State<_TaskCardContent> {
         children: [
           Center(
             child: Text(
-                "📅 ${widget.task.date}",
+                "🗓️ ${widget.task.date}",
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
           ),
           const Divider(thickness: 1, height: 30),
@@ -435,8 +465,8 @@ class _TaskCardContentState extends State<_TaskCardContent> {
             ),
             child: TextField(
               controller: noteController,
-              minLines: 4,
-              maxLines: 6,
+              // minLines: 4,
+              maxLines: 7,
               onTapOutside: (value){
                 FocusScope.of(context).unfocus();
               },
