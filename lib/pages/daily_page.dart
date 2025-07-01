@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../TODO/todopage.dart';
 
 class TaskModel {
   final String date;
@@ -44,12 +47,13 @@ class _DailyPagesState extends State<DailyPages> with TickerProviderStateMixin {
   final List<TaskModel> _tasks = [];
   int _currentIndex = 0;
   bool _isLoading = true;
+  bool _isKeyboardVisible = false;
+  final FocusNode _noteFocusNode = FocusNode();
 
   // Animation controllers
   late AnimationController _slideController;
   late Animation<Offset> _slideAnimation;
   bool _isAnimating = false;
-  bool _isNextCard = true;
 
   @override
   void initState() {
@@ -60,52 +64,56 @@ class _DailyPagesState extends State<DailyPages> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 300),
     );
 
-    // Initialize with default animation (right to left)
+    // Initialize animation to show card immediately
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(1, 0),
+      begin: Offset.zero,
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _slideController,
       curve: Curves.easeInOut,
     ));
 
+    _noteFocusNode.addListener(() {
+      setState(() {
+        _isKeyboardVisible = _noteFocusNode.hasFocus;
+      });
+    });
+
     _initializeTasks();
   }
 
-
-
   Future<void> _initializeTasks() async {
     setState(() => _isLoading = true);
-    final loadedTasks = await _loadTasks();
-    final today = DateFormat('dd MMM yy').format(DateTime.now());
 
-    if (loadedTasks.isEmpty) {
-      _tasks.add(TaskModel(
+    final today = DateFormat('dd MMM yy').format(DateTime.now());
+    final loadedTasks = await _loadTasks();
+
+    _tasks.clear();
+
+    // Add today's card (create if doesn't exist)
+    final todayTask = loadedTasks.firstWhere(
+          (task) => task.date == today,
+      orElse: () => TaskModel(
         date: today,
         wokeUpEarly: false,
         learnedDsa: false,
         note: '',
-      ));
-      await _saveTasks();
-    } else {
-      _tasks.addAll(loadedTasks);
-      _currentIndex = _tasks.indexWhere((task) => task.date == today);
-      if (_currentIndex == -1) {
-        _tasks.insert(0, TaskModel(
-          date: today,
-          wokeUpEarly: false,
-          learnedDsa: false,
-          note: '',
-        ));
-        _currentIndex = 0;
-        await _saveTasks();
-      }
-    }
+      ),
+    );
+    _tasks.add(todayTask);
 
+    // Add any existing previous days
+    _tasks.addAll(loadedTasks.where((task) => task.date != today));
+
+    // Set to today's card
+    _currentIndex = 0;
+
+    await _saveTasks();
     setState(() => _isLoading = false);
+
+    // Show card immediately
+    _slideController.forward();
   }
-
-
 
   Future<List<TaskModel>> _loadTasks() async {
     final prefs = await SharedPreferences.getInstance();
@@ -130,33 +138,37 @@ class _DailyPagesState extends State<DailyPages> with TickerProviderStateMixin {
     final currentDate = DateFormat('dd MMM yy').parse(_tasks[_currentIndex].date);
     final nextDate = DateFormat('dd MMM yy').format(currentDate.add(const Duration(days: 1)));
 
-    setState(() {
-      _tasks.add(TaskModel(
-        date: nextDate,
-        wokeUpEarly: false,
-        learnedDsa: false,
-        note: '',
-      ));
-    });
-
-    await _saveTasks();
+    // Only add if next day doesn't exist
+    if (!_tasks.any((task) => task.date == nextDate)) {
+      setState(() {
+        _tasks.add(TaskModel(
+          date: nextDate,
+          wokeUpEarly: false,
+          learnedDsa: false,
+          note: '',
+        ));
+      });
+      await _saveTasks();
+    }
   }
 
   Future<void> _addPreviousDay() async {
     final currentDate = DateFormat('dd MMM yy').parse(_tasks[_currentIndex].date);
     final prevDate = DateFormat('dd MMM yy').format(currentDate.subtract(const Duration(days: 1)));
 
-    setState(() {
-      _tasks.insert(0, TaskModel(
-        date: prevDate,
-        wokeUpEarly: false,
-        learnedDsa: false,
-        note: '',
-      ));
-      _currentIndex++;
-    });
-
-    await _saveTasks();
+    // Only add if previous day doesn't exist
+    if (!_tasks.any((task) => task.date == prevDate)) {
+      setState(() {
+        _tasks.insert(0, TaskModel(
+          date: prevDate,
+          wokeUpEarly: false,
+          learnedDsa: false,
+          note: '',
+        ));
+        _currentIndex++;
+      });
+      await _saveTasks();
+    }
   }
 
   Future<void> _goToNextCard() async {
@@ -164,9 +176,8 @@ class _DailyPagesState extends State<DailyPages> with TickerProviderStateMixin {
 
     setState(() {
       _isAnimating = true;
-      _isNextCard = true;
       _slideAnimation = Tween<Offset>(
-        begin: const Offset(1, 0),
+        begin: const Offset(-1, 0),
         end: Offset.zero,
       ).animate(CurvedAnimation(
         parent: _slideController,
@@ -185,7 +196,7 @@ class _DailyPagesState extends State<DailyPages> with TickerProviderStateMixin {
     } else {
       await _addNextDay();
       setState(() {
-        _currentIndex++;
+        _currentIndex = _tasks.length - 1;
         _isAnimating = false;
       });
     }
@@ -196,9 +207,8 @@ class _DailyPagesState extends State<DailyPages> with TickerProviderStateMixin {
 
     setState(() {
       _isAnimating = true;
-      _isNextCard = false;
       _slideAnimation = Tween<Offset>(
-        begin: const Offset(-1, 0),
+        begin: const Offset(1, 0),
         end: Offset.zero,
       ).animate(CurvedAnimation(
         parent: _slideController,
@@ -223,6 +233,7 @@ class _DailyPagesState extends State<DailyPages> with TickerProviderStateMixin {
   @override
   void dispose() {
     _slideController.dispose();
+    _noteFocusNode.dispose();
     super.dispose();
   }
 
@@ -230,91 +241,118 @@ class _DailyPagesState extends State<DailyPages> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
         appBar: AppBar(
           toolbarHeight: 80,
           title: const Text("Learnings",
-              style: TextStyle(fontSize: 35, fontWeight: FontWeight.w400, color: Colors.black)),
+            style: TextStyle(
+                fontSize: 35,
+                fontWeight: FontWeight.w400,
+                color: Colors.black
+            ),),
           centerTitle: true,
+          leading: IconButton(onPressed: ()
+          {
+            Navigator.push(context, MaterialPageRoute(builder:(context)=> ToDoPage()));
+          },
+            icon: const Icon(Icons.navigate_before_outlined,size: 50,color: Colors.black,),),
+          actions: [
+            IconButton(onPressed: ()
+            {
+              Navigator.push(context, MaterialPageRoute(builder:(context)=> ToDoPage()));
+            },
+              icon: const Icon(Icons.navigate_next_outlined,size: 50,color: Colors.black,),)
+          ],
           flexibleSpace: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  Colors.blue.shade600,
-                  Colors.blue.shade400,
-                  Colors.blue.shade300,
-                  Colors.blue.shade100,
-                  Colors.blue.shade50,
-                  Colors.white70,
-                ],
-                begin: Alignment.bottomLeft,
-                end: Alignment.topRight,
+                  colors: [
+                    Colors.blue.shade600,
+                    Colors.blue.shade400,
+                    Colors.blue.shade300,
+                    Colors.blue.shade100,
+                    Colors.blue.shade50,
+                    Colors.white70
+                  ],
+                  begin: Alignment.bottomLeft,
+                  end: Alignment.topRight,
+                  transform: GradientRotation(math.pi/3)
               ),
             ),
           ),
-          bottom: const PreferredSize(
-            preferredSize: Size.fromHeight(4.0),
-            child: Divider(height: 4.0, color: Colors.black12),
-          ),
+          bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(4.0),
+              child: Container(
+                color: Colors.black12,
+                height: 4.0,
+              )),
         ),
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : Column(
           children: [
             Expanded(
-              child: SlideTransition(
-                position: _slideAnimation,
-                child: TaskCard(
-                  key: ValueKey(_tasks[_currentIndex].date),
-                  task: _tasks[_currentIndex],
-                  onChanged: _updateCurrentTask,
+              child: SingleChildScrollView(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: _tasks.isNotEmpty
+                      ? SlideTransition(
+                    position: _slideAnimation,
+                    child: TaskCard(
+                      key: ValueKey(_tasks[_currentIndex].date),
+                      task: _tasks[_currentIndex],
+                      onChanged: _updateCurrentTask,
+                      focusNode: _noteFocusNode,
+                    ),
+                  )
+                      : const Center(child: Text('No tasks available')),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 20, bottom: 50),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: _goToPreviousCard,
-                    icon: const Icon(Icons.arrow_back, size: 24),
-                    label: const Text("Prev", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF86FFF9), // Soft teal
-                      foregroundColor: Colors.black87,
-                      elevation: 4,
-                      shadowColor: Colors.lightBlueAccent.shade700,
-                      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+            if (!_isKeyboardVisible && _tasks.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 20, bottom: 80),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: _goToNextCard,
+                      icon: const Icon(Icons.arrow_back, size: 24),
+                      label: const Text("Prev", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF8FFDF7), // Soft teal
+                        foregroundColor: Colors.black87,
+                        elevation: 4,
+                        shadowColor: Colors.lightBlueAccent.shade400,
+                        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
                       ),
                     ),
-                  ),
-                  ElevatedButton(
-                    onPressed: _goToNextCard,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:const Color(0xFF86FFF9),
-                      foregroundColor: Colors.black87,
-                      elevation: 4,
-                      shadowColor: Colors.lightBlueAccent.shade700,
-                      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                    ElevatedButton(
+                      onPressed: _goToPreviousCard,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF8FFDF7),
+                        foregroundColor: Colors.black87,
+                        elevation: 4,
+                        shadowColor: Colors.lightBlueAccent.shade400,
+                        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Text("Next", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                          SizedBox(width: 8),
+                          Icon(Icons.arrow_forward, size: 24),
+                        ],
                       ),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Text("Next", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                        SizedBox(width: 8),
-                        Icon(Icons.arrow_forward, size: 24),
-                      ],
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -325,11 +363,13 @@ class _DailyPagesState extends State<DailyPages> with TickerProviderStateMixin {
 class TaskCard extends StatelessWidget {
   final TaskModel task;
   final ValueChanged<TaskModel> onChanged;
+  final FocusNode focusNode;
 
   const TaskCard({
     super.key,
     required this.task,
     required this.onChanged,
+    required this.focusNode,
   });
 
   @override
@@ -337,6 +377,7 @@ class TaskCard extends StatelessWidget {
     return _TaskCardContent(
       task: task,
       onChanged: onChanged,
+      focusNode: focusNode,
     );
   }
 }
@@ -344,10 +385,12 @@ class TaskCard extends StatelessWidget {
 class _TaskCardContent extends StatefulWidget {
   final TaskModel task;
   final ValueChanged<TaskModel> onChanged;
+  final FocusNode focusNode;
 
   const _TaskCardContent({
     required this.task,
     required this.onChanged,
+    required this.focusNode,
   });
 
   @override
@@ -399,9 +442,10 @@ class _TaskCardContentState extends State<_TaskCardContent> {
   @override
   Widget build(BuildContext context) {
     final isProductive = wokeUpEarly && learnedDsa;
+    final isKeyboardVisible = widget.focusNode.hasFocus;
 
     return Container(
-      margin: const EdgeInsets.all(20),
+      margin: const EdgeInsets.symmetric(vertical:40,horizontal:20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: isProductive
@@ -422,8 +466,9 @@ class _TaskCardContentState extends State<_TaskCardContent> {
         children: [
           Center(
             child: Text(
-                "🗓️ ${widget.task.date}",
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              "📅 ${widget.task.date}",
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
           ),
           const Divider(thickness: 1, height: 30),
           CheckboxListTile(
@@ -434,8 +479,10 @@ class _TaskCardContentState extends State<_TaskCardContent> {
                 _updateTask();
               });
             },
-            title: const Text("Woke up early",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+            title: const Text(
+              "Woke up early",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+            ),
             controlAffinity: ListTileControlAffinity.leading,
           ),
           CheckboxListTile(
@@ -446,36 +493,45 @@ class _TaskCardContentState extends State<_TaskCardContent> {
                 _updateTask();
               });
             },
-            title: const Text("Learned DSA today",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+            title: const Text(
+              "Learned DSA today",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+            ),
             controlAffinity: ListTileControlAffinity.leading,
           ),
           const SizedBox(height: 10),
-          const Text("📝 Notes",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+          const Text(
+            "📝 Notes",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 8),
-          Container(
-            // height: 200,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: Colors.grey.shade400),
-              borderRadius: BorderRadius.circular(12),
-
+          ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: 100,
+              maxHeight: 200,
             ),
-            child: TextField(
-              controller: noteController,
-              // minLines: 4,
-              maxLines: 7,
-              onTapOutside: (value){
-                FocusScope.of(context).unfocus();
-              },
-              decoration: const InputDecoration.collapsed(
-                hintText: "Write your thoughts, achievements, or ideas...",
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: Colors.grey.shade400),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: TextField(
+                onTapOutside: (event) {
+                    FocusScope.of(context).unfocus();
+                },
+                focusNode: widget.focusNode,
+                controller: noteController,
+                maxLines: null,
+                expands: true,
+                decoration: const InputDecoration.collapsed(
+                  hintText: "Write your thoughts, achievements, or ideas...",
+                ),
               ),
             ),
           ),
-          if (isProductive)
+          if (isProductive && !isKeyboardVisible)
             Padding(
               padding: const EdgeInsets.only(top: 10),
               child: Center(
