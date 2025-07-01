@@ -19,12 +19,17 @@
 
 ### ✅ ToDo Page
 
-<img src="assets/images/splashscreen.jpg" width="300" alt="TrackStack">
-<img src="assets/images/todo_page.jpg" width="300" alt="ToDo Page">
+<div style="display: flex; gap: 10px;">
+  <img src="assets/images/splashscreen.jpg" width="1080" alt="Splash Screen">
+  <img src="assets/images/todo_page.jpg" width="1080" alt="ToDo Page">
+</div>
 
 ### 📚 Learning Pages
-<img src="assets/images/learning_1.jpg" width="300" alt="Learning Page 1">
-<img src="assets/images/learning_1.jpg" width="300" alt="Learning Page 2">
+
+<div style="display: flex; gap: 10px;">
+<img src="assets/images/learning_1.jpg" width="1080" alt="Learning Page 1">
+<img src="assets/images/learning_1.jpg" width="1080" alt="Learning Page 2">
+</div>
 
 ---
 
