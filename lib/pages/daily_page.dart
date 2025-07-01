@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:learn_phase/pages/statePage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../TODO/todopage.dart';
@@ -309,7 +310,7 @@ class _DailyPagesState extends State<DailyPages> with TickerProviderStateMixin {
           actions: [
             IconButton(onPressed: ()
             {
-              Navigator.push(context, MaterialPageRoute(builder:(context)=> ToDoPage()));
+              Navigator.push(context, MaterialPageRoute(builder:(context)=> StatsPage()));
             },
               icon: const Icon(Icons.navigate_next_outlined,size: 50,color: Colors.black,),)
           ],

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../pages/daily_page.dart';
+import '../pages/statePage.dart';
 
 class ToDoPage extends StatefulWidget {
   const ToDoPage({super.key});
@@ -56,7 +57,11 @@ class _ToDoPageState extends State<ToDoPage> {
             color: Colors.black
         ),),
           centerTitle: true,
-          leading: IconButton(onPressed: (){}, icon: const Icon(Icons.navigate_before_outlined,size: 50,color: Colors.black,),),
+          leading: IconButton(onPressed: ()
+          {
+            Navigator.push(context, MaterialPageRoute(builder:(context)=> StatsPage()));
+          },
+            icon: const Icon(Icons.navigate_before_outlined,size: 50,color: Colors.black,),),
           actions: [
             IconButton(onPressed: ()
             {
