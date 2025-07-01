@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:learn_phase/TODO/todopage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'appBar.dart';
 import 'daily_page.dart';
 import 'package:fl_chart/fl_chart.dart';
 
@@ -20,6 +22,7 @@ class _StatsPageState extends State<StatsPage> {
   final Color _learnDsaColor = Colors.green;
   String _selectedMonth = DateFormat('MMMM').format(DateTime.now());
   final ScrollController _scrollController = ScrollController();
+
 
   double _calculateHabitCorrelation(List<TaskModel> tasks) {
     if (tasks.length < 3) return 0.0;
@@ -42,7 +45,6 @@ class _StatsPageState extends State<StatsPage> {
 
     return phi.isNaN ? 0.0 : phi;
   }
-
 
   int _calculateCurrentStreak(List<TaskModel> tasks, bool Function(TaskModel) habitSelector) {
     // First sort all tasks by date (newest first)
@@ -75,8 +77,7 @@ class _StatsPageState extends State<StatsPage> {
 
   bool _isConsecutiveDay(DateTime laterDate, DateTime earlierDate) {
     return laterDate.difference(earlierDate).inDays == 1;
-  }
-  @override
+  }  @override
   void initState() {
     super.initState();
     _loadTasks();
@@ -134,39 +135,38 @@ class _StatsPageState extends State<StatsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Productivity Stats',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
-        ),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const DailyPages()),
-          ),
-        ),
-        elevation: 0,
-        backgroundColor: Colors.blue.shade50,
-      ),
+      appBar: buildFancyAppBar(
+      context: context,
+      title: '🎯Productivity',
+      onBack: () => Navigator.pop(context,MaterialPageRoute(
+          builder:(context)=> DailyPages()
+      )),
+      onNext: () => Navigator.push(context,MaterialPageRoute(
+          builder:(context)=> ToDoPage()
+      )),
+      backicon: Icons.arrow_back_sharp,
+        nexticon: Icons.insights_sharp
+        // You can use any icon here
+    ),
+
+
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildMonthSelector(),
-                  const SizedBox(height: 16),
-                  _buildSuccessRateCards(),
-                  const SizedBox(height: 24),
-                  _buildChartSection(),
-                  const SizedBox(height: 24),
-                  _buildDetailedListSection(),
-                ],
-              ),
-            ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildMonthSelector(),
+            const SizedBox(height: 16),
+            _buildSuccessRateCards(),
+            const SizedBox(height: 24),
+            _buildChartSection(),
+            const SizedBox(height: 24),
+            _buildDetailedListSection(),
+          ],
+        ),
+      ),
     );
   }
 
@@ -180,7 +180,14 @@ class _StatsPageState extends State<StatsPage> {
 
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        side: BorderSide(
+          color: Colors.black,
+          width: 0.3,
+        ),
+        borderRadius: BorderRadius.circular(12.0), // border radius
+      ),
+
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -264,15 +271,21 @@ class _StatsPageState extends State<StatsPage> {
   }
 
   Widget _buildStatCard(
-    String title,
-    IconData icon,
-    String value,
-    Color color,
-    double successRate,
-  ) {
+      String title,
+      IconData icon,
+      String value,
+      Color color,
+      double successRate,
+      ) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        side: BorderSide(
+          color: Colors.black,
+          width: 0.3,
+        ),
+        borderRadius: BorderRadius.circular(12.0), // border radius
+      ),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -342,7 +355,7 @@ class _StatsPageState extends State<StatsPage> {
               Text(
                 '${monthTasks.length}/$daysInMonth days',
                 style: TextStyle(
-                  fontSize: 8,
+                  fontSize: 12,
                   color: Colors.blue.shade700,
                   fontWeight: FontWeight.w500,
                 ),
@@ -354,20 +367,24 @@ class _StatsPageState extends State<StatsPage> {
         Card(
           elevation: 2,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+              color: Colors.black,
+              width: 0.3,
+            ),
+            borderRadius: BorderRadius.circular(12.0), // border radius
           ),
           margin: const EdgeInsets.symmetric(horizontal: 12),
           child: Container(
-            height: 280, // Increased height
+            height: 280,
             padding: const EdgeInsets.all(16),
             child: hasData
                 ? _buildScrollableChart(monthTasks)
                 : const Center(
-                    child: Text(
-                      'No data for selected month',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ),
+              child: Text(
+                'No data for selected month',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
           ),
         ),
       ],
@@ -381,7 +398,7 @@ class _StatsPageState extends State<StatsPage> {
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: SizedBox(
-              width: tasks.length * 50.0, // 50px per day
+              width: tasks.length * 50.0,
               child: BarChart(
                 BarChartData(
                   barTouchData: BarTouchData(
@@ -411,9 +428,7 @@ class _StatsPageState extends State<StatsPage> {
                         showTitles: true,
                         getTitlesWidget: (value, meta) {
                           final day = DateFormat('d').format(
-                            DateFormat(
-                              'dd MMM yy',
-                            ).parse(tasks[value.toInt()].date),
+                            DateFormat('dd MMM yy').parse(tasks[value.toInt()].date),
                           );
                           return Padding(
                             padding: const EdgeInsets.only(top: 4),
@@ -464,27 +479,33 @@ class _StatsPageState extends State<StatsPage> {
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
+        const Divider(thickness: 2, height: 10),
         _buildCompactDailyNotes(tasks),
       ],
     );
   }
 
   Widget _buildCompactDailyNotes(List<TaskModel> tasks) {
+    // Filter tasks to only include those with notes
+    final tasksWithNotes = tasks.where((task) => task.note.isNotEmpty).toList();
+
     return SizedBox(
-      height: 80, // Fixed height for notes
-      child: ListView.builder(
+      height: tasksWithNotes.isNotEmpty ? 80 : 0, // Only take height if there are notes
+      child: tasksWithNotes.isNotEmpty
+          ? ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: tasks.length,
+        itemCount: tasksWithNotes.length,
         itemBuilder: (context, index) {
-          final task = tasks[index];
+          final task = tasksWithNotes[index];
           return Container(
-            width: 160, // Fixed width per note
-            margin: const EdgeInsets.only(right: 8),
+            width: 140,
+            margin: const EdgeInsets.only(right: 10 ),
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: Colors.grey.shade100,
               borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.black,width: 0.5),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -499,9 +520,7 @@ class _StatsPageState extends State<StatsPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  task.note.isNotEmpty
-                      ? task.note
-                      : 'No note',
+                  task.note,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -513,7 +532,8 @@ class _StatsPageState extends State<StatsPage> {
             ),
           );
         },
-      ),
+      )
+          : const SizedBox.shrink(), // Show nothing if no notes exist
     );
   }
 
@@ -523,29 +543,34 @@ class _StatsPageState extends State<StatsPage> {
       return const SizedBox.shrink();
     }
 
-    // Calculate streaks
     final wakeUpStreak = _calculateCurrentStreak(monthTasks, (task) => task.wokeUpEarly);
     final dsaStreak = _calculateCurrentStreak(monthTasks, (task) => task.learnedDsa);
-
-    // Calculate correlation
     final correlation = _calculateHabitCorrelation(monthTasks);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          'Performance Insights',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: const Text(
+            'Performance Insights',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
         ),
         const SizedBox(height: 8),
         Card(
           elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+          side: BorderSide(
+    color: Colors.black,
+    width: 0.3,
+    ),
+    borderRadius: BorderRadius.circular(12.0), // border radius
+    ),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                // Streaks Section
                 const Text(
                   'Current Streaks',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -559,12 +584,8 @@ class _StatsPageState extends State<StatsPage> {
                   ],
                 ),
                 const SizedBox(height: 16),
-
-                // Divider
                 const Divider(height: 1),
                 const SizedBox(height: 16),
-
-                // Habit Correlation
                 const Text(
                   'Habit Synergy',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -589,7 +610,7 @@ class _StatsPageState extends State<StatsPage> {
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
-            border: Border.all(color: color),
+            border: Border.all(color: Colors.black,width: 0.5),
           ),
           child: Text(
             streak > 3 ? '🔥' : streak > 0 ? '⭐' : '❄️',
@@ -601,7 +622,7 @@ class _StatsPageState extends State<StatsPage> {
           habit,
           style: TextStyle(
             fontSize: 14,
-            color: Colors.grey[600],
+            color: Colors.black,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -648,7 +669,6 @@ class _StatsPageState extends State<StatsPage> {
   }
 
   Widget _buildCorrelationInsight(double correlation) {
-    // Ensure correlation is calculated properly
     correlation = _calculateHabitCorrelation(_getTasksForSelectedMonth());
 
     Map<String, dynamic> insightData;
@@ -685,8 +705,8 @@ class _StatsPageState extends State<StatsPage> {
         color: insightData['color'].withOpacity(0.15),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: insightData['color'].withOpacity(0.3),
-          width: 1,
+          color: Colors.black,
+          width: 0.2,
         ),
       ),
       child: Column(
@@ -717,7 +737,4 @@ class _StatsPageState extends State<StatsPage> {
       ),
     );
   }
-
-
-
 }

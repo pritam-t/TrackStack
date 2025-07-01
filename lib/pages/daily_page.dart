@@ -1,11 +1,11 @@
 import 'dart:convert';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:learn_phase/pages/statePage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../TODO/todopage.dart';
+import 'appBar.dart';
 
 class TaskModel {
   final String date;
@@ -291,122 +291,88 @@ class _DailyPagesState extends State<DailyPages> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          toolbarHeight: 80,
-          title: const Text("Learnings",
-            style: TextStyle(
-                fontSize: 35,
-                fontWeight: FontWeight.w400,
-                color: Colors.black
-            ),),
-          centerTitle: true,
-          leading: IconButton(onPressed: ()
-          {
-            Navigator.push(context, MaterialPageRoute(builder:(context)=> ToDoPage()));
-          },
-            icon: const Icon(Icons.navigate_before_outlined,size: 50,color: Colors.black,),),
-          actions: [
-            IconButton(onPressed: ()
-            {
-              Navigator.push(context, MaterialPageRoute(builder:(context)=> StatsPage()));
-            },
-              icon: const Icon(Icons.navigate_next_outlined,size: 50,color: Colors.black,),)
-          ],
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  colors: [
-                    Colors.blue.shade600,
-                    Colors.blue.shade400,
-                    Colors.blue.shade300,
-                    Colors.blue.shade100,
-                    Colors.blue.shade50,
-                    Colors.white70
-                  ],
-                  begin: Alignment.bottomLeft,
-                  end: Alignment.topRight,
-                  transform: GradientRotation(math.pi/3)
+    return Scaffold(
+      appBar:  buildFancyAppBar(
+          context: context,
+          title: '📚 Learning',
+          onBack: () => Navigator.push(context,MaterialPageRoute(
+              builder:(context)=> ToDoPage()
+          )),
+          onNext: () => Navigator.push(context,MaterialPageRoute(
+              builder:(context)=> StatsPage()
+          )),
+          backicon: Icons.arrow_back_sharp,
+          nexticon: Icons.arrow_forward_sharp
+        // You can use any icon here
+      ),
+
+
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: _tasks.isNotEmpty
+                    ? SlideTransition(
+                  position: _slideAnimation,
+                  child: TaskCard(
+                    key: ValueKey(_tasks[_currentIndex].date),
+                    task: _tasks[_currentIndex],
+                    onChanged: _updateCurrentTask,
+                    focusNode: _noteFocusNode,
+                  ),
+                )
+                    : const Center(child: Text('No tasks available')),
               ),
             ),
           ),
-          bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(4.0),
-              child: Container(
-                color: Colors.black12,
-                height: 4.0,
-              )),
-        ),
-        body: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  child: _tasks.isNotEmpty
-                      ? SlideTransition(
-                    position: _slideAnimation,
-                    child: TaskCard(
-                      key: ValueKey(_tasks[_currentIndex].date),
-                      task: _tasks[_currentIndex],
-                      onChanged: _updateCurrentTask,
-                      focusNode: _noteFocusNode,
+          if (!_isKeyboardVisible && _tasks.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 20, bottom: 80),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: _goToNextCard,
+                    icon: const Icon(Icons.arrow_back, size: 24,color: Colors.white,),
+                    label: const Text("Prev", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500,color: Colors.white)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2A4768), // Soft teal
+                      foregroundColor: Colors.black87,
+                      elevation: 4,
+                      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
-                  )
-                      : const Center(child: Text('No tasks available')),
-                ),
+                  ),
+                  ElevatedButton(
+                    onPressed: _goToPreviousCard,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2A4768),
+                      foregroundColor: Colors.black87,
+                      elevation: 4,
+                      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Text("Next", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500,color: Colors.white)),
+                        SizedBox(width: 8),
+                        Icon(Icons.arrow_forward, size: 24,color: Colors.white,),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-            if (!_isKeyboardVisible && _tasks.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 20, bottom: 80),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: _goToNextCard,
-                      icon: const Icon(Icons.arrow_back, size: 24),
-                      label: const Text("Prev", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF8FFDF7), // Soft teal
-                        foregroundColor: Colors.black87,
-                        elevation: 4,
-                        shadowColor: Colors.lightBlueAccent.shade400,
-                        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: _goToPreviousCard,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF8FFDF7),
-                        foregroundColor: Colors.black87,
-                        elevation: 4,
-                        shadowColor: Colors.lightBlueAccent.shade400,
-                        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Text("Next", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                          SizedBox(width: 8),
-                          Icon(Icons.arrow_forward, size: 24),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -502,8 +468,9 @@ class _TaskCardContentState extends State<_TaskCardContent> {
       decoration: BoxDecoration(
         color: isProductive
             ? const Color.fromRGBO(131, 234, 255, 1.0)
-            : const Color.fromRGBO(222, 241, 255, 1.0),
+            : const Color.fromRGBO(255, 255, 255, 1.0),
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.black,width: 0.5),
         boxShadow: [
           BoxShadow(
             color: Colors.blueGrey.shade400,

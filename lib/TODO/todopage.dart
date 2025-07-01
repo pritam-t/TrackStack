@@ -1,9 +1,8 @@
 import 'dart:convert';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:learn_phase/pages/daily_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../pages/daily_page.dart';
+import '../pages/appBar.dart';
 import '../pages/statePage.dart';
 
 class ToDoPage extends StatefulWidget {
@@ -46,131 +45,96 @@ class _ToDoPageState extends State<ToDoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          toolbarHeight: 80,
-        title: const Text("To-Do",
-          style: TextStyle(
-          fontSize: 35,
-          fontWeight: FontWeight.w400,
-            color: Colors.black
-        ),),
-          centerTitle: true,
-          leading: IconButton(onPressed: ()
-          {
-            Navigator.push(context, MaterialPageRoute(builder:(context)=> StatsPage()));
-          },
-            icon: const Icon(Icons.navigate_before_outlined,size: 50,color: Colors.black,),),
-          actions: [
-            IconButton(onPressed: ()
-            {
-              Navigator.push(context, MaterialPageRoute(builder:(context)=> DailyPages()));
-            },
-              icon: const Icon(Icons.navigate_next_outlined,size: 50,color: Colors.black,),)
-          ],
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  colors: [
-                    Colors.blue.shade600,
-                    Colors.blue.shade400,
-                    Colors.blue.shade300,
-                    Colors.blue.shade100,
-                    Colors.blue.shade50,
-                    Colors.white70
-                  ],
-                  begin: Alignment.bottomLeft,
-                  end: Alignment.topRight,
-                  transform: GradientRotation(math.pi/3)
-              ),
-            ),
-          ),
-          bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(4.0),
-              child: Container(
-                color: Colors.black12,
-                height: 4.0,
-              )),
-        ),
+    return Scaffold(
+      appBar:  buildFancyAppBar(
+          context: context,
+          title: '📝 To-Do ',
+          onBack: () => Navigator.push(context,MaterialPageRoute(builder: (context)=> DailyPages())),
+          onNext: () => Navigator.pop(context,MaterialPageRoute(
+              builder:(context)=> StatsPage()
+          )),
+          backicon: Icons.add_task_sharp,
+          nexticon: Icons.arrow_forward_sharp
+        // You can use any icon here
+      ),
 
-          body: Column(
-            children: [
-              Align(
-                alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: InkWell(
-                    onTap: () {
-                      showAddTaskDialog(context);
-                    },
-                    splashColor: Colors.blueAccent,
-                    splashFactory: InkSparkle.splashFactory,
-                    child: Container(
-                      height: 50,
-                      width: 120,
-                      decoration: BoxDecoration(
-                        color: Colors.lightBlue.shade200,
-                        borderRadius: BorderRadius.circular(10.0),
-                        border: Border.all(color: Colors.black, width: 1.5),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Add ",
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w500,
-                              ),
+        body: Column(
+          children: [
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: InkWell(
+                  onTap: () {
+                    showAddTaskDialog(context);
+                  },
+                  splashColor: Colors.blueAccent,
+                  splashFactory: InkSparkle.splashFactory,
+                  child: Container(
+                    height: 50,
+                    width: 120,
+                    decoration: BoxDecoration(
+                      color: Colors.lightBlue.shade200,
+                      borderRadius: BorderRadius.circular(10.0),
+                      border: Border.all(color: Colors.black, width: 1.5),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Add ",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
                             ),
-                            Icon(Icons.add_circle_outlined, size: 20),
-                          ],
-                        ),
+                          ),
+                          Icon(Icons.add_circle_outlined, size: 20),
+                        ],
                       ),
                     ),
                   ),
                 ),
-              ), //Add Icon
+              ),
+            ), //Add Icon
 
-              Expanded(
-                    child: Card(
-                      margin: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),
-                      elevation: 20,
-                      color: Color.fromRGBO(188, 235, 255, 1.0),
-                      shadowColor: Color.fromRGBO(92, 101, 106, 1.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20)
-                      ),
-
-                      child: arrTask.isEmpty?
-                      const Center(
-                        child: Text('No Tasks Yet',style: TextStyle(fontSize: 18),),
-                      ):
-                      ListView.builder(
-                        itemCount: arrTask.length,
-                          scrollDirection: Axis.vertical,
-                          itemBuilder: (context,index)
-                      {
-                        final key = arrTask.keys.elementAt(index);
-                        final value = arrTask[key]!;
-                        return InkWell(
-                          onLongPress: (){
-                            showDeleteTaskDialog(context,key);
-                          },
-                          child: TaskContainer(
-                            task: key,
-                            info: value
-                          ),
-
-                        );
-                      }),
+            Expanded(
+                  child: Card(
+                    margin: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),
+                    elevation: 20,
+                    color: Colors.white,
+                    shadowColor: Color.fromRGBO(92, 101, 106, 1.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)
                     ),
-                  )
-                ],),
-      ),);
+
+                    child: arrTask.isEmpty?
+                    const Center(
+                      child: Text('No Tasks Yet',style: TextStyle(fontSize: 18),),
+                    ):
+                    ListView.builder(
+                      itemCount: arrTask.length,
+                        scrollDirection: Axis.vertical,
+                        itemBuilder: (context,index)
+                    {
+                      final key = arrTask.keys.elementAt(index);
+                      final value = arrTask[key]!;
+                      return InkWell(
+                        onLongPress: (){
+                          showDeleteTaskDialog(context,key);
+                        },
+                        child: TaskContainer(
+                          task: key,
+                          info: value
+                        ),
+
+                      );
+                    }),
+                  ),
+                )
+              ],),
+    );
   }
 
 

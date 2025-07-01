@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         primarySwatch: Colors.blue, // for consistency
-        scaffoldBackgroundColor: Color.fromRGBO(199, 220, 225, 1.0),
+        scaffoldBackgroundColor: Color.fromRGBO(208, 243, 255, 1.0), //
         fontFamily: 'Merri',
 
       ),

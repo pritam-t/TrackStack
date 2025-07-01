@@ -39,6 +39,7 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   flutter_card_swiper: ^7.0.2
   fl_chart: ^1.0.0
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:
