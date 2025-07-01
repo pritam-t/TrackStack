@@ -17,21 +17,24 @@
 
 ## 📸 Screenshots
 
-## ✅ ToDo Page
 
-<div style="display: flex; gap: 10px;">
-<img src="assets/images/splashscreen.jpg" width="45%" alt="Splash Screen">
-<img src="assets/images/todo_page.jpg" width="45%" alt="ToDo Page">
-</div>
 
-<br>
+<p align="center">
 
-##  📚 Learning Pages
+| ![Splash Screen](assets/images/splashscreen.jpg) | ![Learning Page](assets/images/learning_1.jpg.jpg) |
+|:------------------------------------------------:|:--------------------------------------------------:|
+|                **Splash Screen**                 |                 **Learning Page**                  |
 
-<div style="display: flex; gap: 10px;">
-<img src="assets/images/learning_1.jpg" width="45%" alt="Learning Page 1">
-<img src="assets/images/learning_2.jpg" width="45%" alt="Learning Page 2">
-</div>
+| ![Product 1](assets/images/prod1.jpg) | ![Product 2](assets/images/prod2.jpg) |
+|:-------------------------------------:|:-------------------------------------:|
+|             **Product 1**             |             **Product 2**             |
+
+![ToDo Page](assets/images/todo.jpg)
+**ToDo Page**
+</p>
+
+
+
 
 ---
 
