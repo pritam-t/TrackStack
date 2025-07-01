@@ -25,11 +25,12 @@
 </div>
 
 <br>
-## 📚 Learning Pages
+
+##  📚 Learning Pages
 
 <div style="display: flex; gap: 10px;">
 <img src="assets/images/learning_1.jpg" width="45%" alt="Learning Page 1">
-<img src="assets/images/learning_1.jpg" width="45%" alt="Learning Page 2">
+<img src="assets/images/learning_2.jpg" width="45%" alt="Learning Page 2">
 </div>
 
 ---
